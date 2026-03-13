@@ -1,9 +1,19 @@
 import discord
 from discord.ext import commands
 import os
+import logging
 
 # Importa as configurações do arquivo config.py
 import config
+
+# Configuração básica de Logging
+# Isso fará com que os logs mostrem hora, nível (INFO/ERROR) e a mensagem
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("Main")
 
 # ===== CLASSE PRINCIPAL DO BOT =====
 class MyBot(commands.Bot):
@@ -23,21 +33,21 @@ class MyBot(commands.Bot):
             if filename.endswith('.py'):
                 try:
                     await self.load_extension(f'cogs.{filename[:-3]}')
-                    print(f"✅ Cog '{filename[:-3]}' carregado com sucesso.")
+                    logger.info(f"✅ Cog '{filename[:-3]}' carregado com sucesso.")
                 except Exception as e:
-                    print(f"❌ Falha ao carregar o cog '{filename[:-3]}'. Erro: {e}")
+                    logger.error(f"❌ Falha ao carregar o cog '{filename[:-3]}'. Erro: {e}")
 
         # Sincroniza os comandos de aplicação (slash commands) com o servidor especificado
         await self.tree.sync(guild=discord.Object(id=config.GUILD_ID))
 
     async def on_ready(self):
-        print(f"🚀 Bot conectado como {self.user} e comandos sincronizados!")
+        logger.info(f"🚀 Bot conectado como {self.user} e comandos sincronizados!")
 
 if __name__ == "__main__":
     if not config.BOT_TOKEN:
-        print("❌ ERRO: O token do bot não foi encontrado. Verifique seu arquivo .env e a variável DISCORD_TOKEN.")
+        logger.critical("❌ ERRO: O token do bot não foi encontrado. Verifique seu arquivo .env e a variável DISCORD_TOKEN.")
     else:
         # Instancia e executa o bot apenas se o token for encontrado
-        print("▶️  Inicializando o bot...")
+        logger.info("▶️  Inicializando o bot...")
         bot = MyBot()
         bot.run(config.BOT_TOKEN)

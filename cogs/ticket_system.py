@@ -1,13 +1,16 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-
+import logging
 
 import asyncio
 
 # Importa as configurações diretamente. Como o bot é iniciado a partir de main.py,
 # a pasta raiz já está no caminho de busca do Python.
 import config
+
+# Configura um logger específico para este arquivo
+logger = logging.getLogger(__name__)
 
 
 
@@ -62,7 +65,7 @@ class TicketButton(discord.ui.Button):
                 ephemeral=True
             )
 
-            print(f"Erro de configuração: Categoria={category} Staff={staff_role} Booster={booster_role}")
+            logger.error(f"Erro de configuração ao criar ticket: Categoria={category} Staff={staff_role} Booster={booster_role}")
             return
 
         channel_name = f"ticket-{interaction.user.name}-{self.categoria}".replace(" ", "-").lower()
@@ -148,7 +151,7 @@ class TicketSystem(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("⚙️  Cog 'TicketSystem' pronto e views persistentes registradas.")
+        logger.info("⚙️  Cog 'TicketSystem' pronto e views persistentes registradas.")
 
     @app_commands.command(name="painel", description="Envia o painel de abertura de tickets")
     @app_commands.guilds(discord.Object(id=config.GUILD_ID))
@@ -170,7 +173,7 @@ class TicketSystem(commands.Cog):
         # Envia a mensagem com a view persistente que foi registrada no bot.
         await interaction.channel.send(embed=embed, view=TicketSelectView())
         await interaction.response.send_message("✅ Painel de tickets enviado com sucesso!", ephemeral=True)
-        print(f"Painel enviado por {interaction.user}")
+        logger.info(f"Painel de tickets enviado por {interaction.user} no canal {interaction.channel.name}")
 
 
 # Função `setup` que o discord.py chama para carregar o cog
